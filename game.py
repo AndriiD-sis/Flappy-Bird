@@ -7,6 +7,7 @@ init()
 window_size = 1200, 800
 
 window = display.set_mode(window_size)
+display.set_caption("Flappy Bird")
 clock = time.Clock()
 
 play_rect = Rect(150, window_size[1]//2 -100, 100, 100)
@@ -32,6 +33,13 @@ main_font = font.Font(None, 100)
 score = 0
 lose = False
 y_vel = 0.0
+
+bird_img = image.load("bird.png").convert_alpha()
+bird_img = transform.scale(bird_img, (play_rect.width, play_rect.height))
+pipe_up_img = image.load("pipe_up.png").convert_alpha()
+pipe_down_img = image.load("pipe_down.png").convert_alpha()
+bg_img = image.load("bg.jpg").convert()
+bg_img = transform.scale(bg_img, window_size)
 
 fs = 16000
 block = 256
@@ -65,14 +73,27 @@ with sd.InputStream(
         y_vel += gravity
         play_rect.y += int(y_vel)
 
-        window.fill("sky blue")
-        draw.rect(window, "yellow", play_rect)
+        if play_rect.top < 0:
+            play_rect.top = 0
+            y_vel = 0
+
+        if play_rect.bottom > window_size[1]:
+            play_rect.bottom = window_size[1]
+            y_vel = 0
+
+        window.blit(bg_img, (0, 0))
+        window.blit(bird_img, play_rect)
 
         for pipe in pipes[:]:
             if not lose:
                 pipe.x -= 10
 
-            draw.rect(window, "green", pipe)
+            if pipe.top == 0:
+                pipe_img = transform.scale(pipe_up_img, (pipe.width, pipe.height))
+            else:
+                pipe_img = transform.scale(pipe_down_img, (pipe.width, pipe.height))
+
+            window.blit(pipe_img, pipe)
 
             if pipe.x <= 100:
                 pipes.remove(pipe)
@@ -98,9 +119,6 @@ with sd.InputStream(
             play_rect.y = window_size[1]//2 -100
             score = 0
             y_vel = 0
-
-        if play_rect.y > window_size[1] - play_rect.h:
-            lose = True
 
         if lose and wait > 1:
             for pipe in pipes:
