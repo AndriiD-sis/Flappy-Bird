@@ -1,4 +1,5 @@
 from pygame import *
+from pygame import quit as pg_quit
 from random import randint
 import sounddevice as sd
 import numpy as np
@@ -48,6 +49,7 @@ gravity = 0.6
 THRESH = 0.01
 IMPULSE = -8.0
 wait = 40
+running = True
 
 def audio_cb(indata, frames, time, status):
     global mic_level
@@ -62,10 +64,10 @@ with sd.InputStream(
     blocksize=block,
     callback=audio_cb
 ):
-    while True:
+    while running:
         for e in event.get():
             if e.type == QUIT:
-                quit()
+                    running = False
 
         if mic_level > THRESH:
             y_vel = IMPULSE
@@ -119,10 +121,11 @@ with sd.InputStream(
             play_rect.y = window_size[1]//2 -100
             score = 0
             y_vel = 0
-
-        if lose and wait > 1:
-            for pipe in pipes:
-                pipe.x += 8
-            wait -= 1
-        else:
             wait = 40
+
+        if lose:
+            if wait > 0:
+                for pipe in pipes:
+                    pipe.x += 8
+                wait -= 1
+pg_quit()
