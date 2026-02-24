@@ -121,11 +121,12 @@ with sd.InputStream(
             play_rect.y = window_size[1]//2 -100
             score = 0
             y_vel = 0
-            wait = 40
 
-        if lose:
-            if wait > 0:
-                for pipe in pipes:
-                    pipe.x += 8
-                wait -= 1
+        if lose and wait > 1:
+            for pipe in pipes:
+                pipe.x += 8
+            wait -= 1
+        else: 
+            wait = 40
+            lose = False
 pg_quit()
